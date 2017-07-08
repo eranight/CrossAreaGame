@@ -8,6 +8,8 @@
 USING_NS_CC;
 using namespace crossareagame;
 
+static std::vector<cocos2d::Color4B> defaultColors = { Color4B(22, 147, 165, 255), Color4B(251, 184, 41, 255), Color4B(224, 36, 119, 255), Color4B(240, 232, 12, 255) };
+
 Script::Script(GameLayer * gameLayer) :
 gameLayer(gameLayer),
 finalizeProcessing(false),
@@ -40,7 +42,7 @@ void EasyScript::refresh()
 	int score = gameLayer->getGameInformation()->getScore();
 	int divscore = score / 5;
 
-	minScalePercent = 100.0f - std::min(5.0f * divscore, 70.0f);
+	minScalePercent = 100.0f - std::min(5.0f * divscore, 50.0f);
 	minCrossTimePercent = 0.0f + std::min(3.0f * divscore, 60.0f);
 	nextGenerationTimePercent = 0.0f + std::min(10.0f * divscore, 70.0f);
 
@@ -50,12 +52,12 @@ void EasyScript::refresh()
 
 	cicleCounter.reset();
 	cicleCounter.setCurrect(0);
-	cicleCounter.setMaximum(5);
+	cicleCounter.setMaximum(10);
 
 	CircleGeneratorConfiguration configuration;
 	configuration.scalePercent.first = minScalePercent * scalePer; configuration.scalePercent.second = 100.0f * scalePer;
 	configuration.crossTime.first = 4.0f - 0.04f * minCrossTimePercent; configuration.crossTime.second = 5.0f - 0.05f * minCrossTimePercent;
-	configuration.colors = { Color4B(Color3B(22, 147, 165)), Color4B(Color3B(251, 184, 41)), Color4B(Color3B(224, 36, 119)), Color4B(Color3B(240, 232, 12)) };
+	configuration.colors = defaultColors;
 	gameLayer->getCircleGenerator()->setConfiguration(configuration);
 	
 	gameLayer->getPlaygroundLayer()->tapCircle = [this, scalePer](CircleStruct * circleStruct)
@@ -158,12 +160,12 @@ void OneSideFastScript::refresh()
 	cicleCounter.setMaximum(10);
 
 	side = PlaygroundSide::Bottom;
-	crossTime = 3.0f - std::min(1.0f, (score / 10) * 0.1f);
+	crossTime = 2.5f - std::min(1.0f, (score / 10) * 0.1f);
 
 	CircleGeneratorConfiguration configuration;
 	configuration.scalePercent.first = (100.0f - std::min(5.0f * (score / 5), 70.0f)) * scalePer; configuration.scalePercent.second = 100.0f * scalePer;
 	configuration.crossTime.first = crossTime; configuration.crossTime.second = crossTime;
-	configuration.colors = { Color4B(Color3B(22, 147, 165)), Color4B(Color3B(251, 184, 41)), Color4B(Color3B(224, 36, 119)), Color4B(Color3B(240, 232, 12)) };
+	configuration.colors = defaultColors;
 	gameLayer->getCircleGenerator()->setConfiguration(configuration);
 
 	warningLabel->runAction(warningLabelEvent.getActionClone());
@@ -286,7 +288,7 @@ void EverySideScript::refresh()
 	CircleGeneratorConfiguration configuration;
 	configuration.scalePercent.first = (100.0f - std::min(5.0f * (score / 5), 70.0f)) * scalePer; configuration.scalePercent.second = 100.0f * scalePer;
 	configuration.crossTime.first = crossTime; configuration.crossTime.second = crossTime;
-	configuration.colors = { Color4B(Color3B(22, 147, 165)), Color4B(Color3B(251, 184, 41)), Color4B(Color3B(224, 36, 119)), Color4B(Color3B(240, 232, 12)) };
+	configuration.colors = defaultColors;
 	gameLayer->getCircleGenerator()->setConfiguration(configuration);
 
 	for (auto & label : warningLabels)
@@ -337,6 +339,114 @@ void EverySideScript::runFinalizeProcess()
 	{
 		label->stopAllActions();
 		label->setVisible(false);
+	}
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+///////                      OnlyBoardColor                       ///////
+/////////////////////////////////////////////////////////////////////////
+
+OnlyBoardColor::OnlyBoardColor(GameLayer * gameLayer, bool showAttempt) :
+Script(gameLayer), showAttempt(showAttempt)
+{
+	
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	choosingColor = Color4F(defaultColors[RandomHelper::random_int<int>(0, defaultColors.size() - 1)]);
+
+	int wdht = 20;
+	float w_2 = wdht * 0.5f;
+	auto frame = DrawNode::create();
+	frame->setLineWidth(wdht);
+	Vec2 points[] = {
+		origin + Vec2(w_2, w_2),
+		Vec2(origin.x + w_2, origin.y + visibleSize.height - w_2),
+		origin + visibleSize - Vec2(w_2, w_2),
+		Vec2(origin.x + visibleSize.width - w_2, origin.y + w_2),
+		origin + Vec2(w_2, w_2)
+	};
+	frame->drawPolygon(points, 5, Color4F(0, 0, 0, 0), wdht, choosingColor);
+	gameLayer->addChild(frame, 2, 99);
+
+	if (showAttempt)
+	{
+		gameLayer->showCentralLabel("tap a circle wich has color like the frame\n(tap to continue)", true);
+	}
+}
+
+OnlyBoardColor::~OnlyBoardColor()
+{
+	gameLayer->removeChildByTag(99);
+}
+
+void OnlyBoardColor::refresh()
+{
+	float scalePer = 0.5f * Director::getInstance()->getContentScaleFactor();
+
+	finalized = false;
+	finalizeProcessing = false;
+
+	int score = gameLayer->getGameInformation()->getScore();
+	int divscore = score / 5;
+
+	float minScalePercent = 100.0f - std::min(5.0f * divscore, 50.0f);
+	float minCrossTimePercent = 0.0f + std::min(3.0f * divscore, 60.0f);
+	float nextGenerationTimePercent = 0.0f + std::min(10.0f * divscore, 70.0f);
+
+	generationTime.reset();
+	generationTime.setCurrect(0.0f);
+	generationTime.setMaximum(2.0f - 0.01f * nextGenerationTimePercent);
+
+	cicleCounter.reset();
+	cicleCounter.setCurrect(0);
+	cicleCounter.setMaximum(10);
+
+	CircleGeneratorConfiguration configuration;
+	configuration.scalePercent.first = minScalePercent * scalePer; configuration.scalePercent.second = 100.0f * scalePer;
+	configuration.crossTime.first = 4.0f - 0.04f * minCrossTimePercent; configuration.crossTime.second = 5.0f - 0.05f * minCrossTimePercent;
+	configuration.colors = defaultColors;
+	gameLayer->getCircleGenerator()->setConfiguration(configuration);
+
+	gameLayer->getPlaygroundLayer()->tapCircle = [this, scalePer](CircleStruct * circleStruct)
+	{
+		if (circleStruct->color == this->choosingColor)
+			this->gameLayer->getGameInformation()->addScore();
+		else
+			this->gameLayer->getGameInformation()->addLives(-1);
+	};
+
+	gameLayer->getPlaygroundLayer()->missCircle = [this](CircleStruct * circleStruct)
+	{
+		if (circleStruct->color == this->choosingColor)
+			this->gameLayer->getGameInformation()->addLives(-1);
+	};
+}
+
+void OnlyBoardColor::update(float dt)
+{
+	auto playground = gameLayer->getPlaygroundLayer();
+	if (!finalizeProcessing && !finalized)
+	{
+		generationTime.addict(dt);
+		if (generationTime.isFull())
+		{
+			playground->addCircle(gameLayer->getCircleGenerator()->getNextCircle());
+			playground->addCircle(gameLayer->getCircleGenerator()->getNextCircle());
+			generationTime.reset();
+			cicleCounter.addict(1);
+			if (cicleCounter.isFull())
+				runFinalizeProcess();
+		}
+	}
+	else if (finalizeProcessing)
+	{
+		if (playground->circles.empty())
+		{
+			finalizeProcessing = false;
+			finalized = true;
+		}
 	}
 }
 

@@ -108,6 +108,28 @@ namespace crossareagame
 		float crossTime;
 
 	};
+
+	class OnlyBoardColor : public Script
+	{
+	public:
+		OnlyBoardColor(GameLayer * gameLayer, bool showAttempt);
+		~OnlyBoardColor();
+
+	public:
+		void refresh() override;
+		void update(float dt) override;
+		//void runFinalizeProcess() override;
+
+	private:
+		bool showAttempt;
+
+		crossareagame::TimesCounter<float> generationTime;
+		crossareagame::TimesCounter<int>   cicleCounter;
+
+		cocos2d::Color4F choosingColor;
+
+	};
+
 }
 
 #endif //__SCRIPT_H__

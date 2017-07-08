@@ -7,15 +7,13 @@
 USING_NS_CC;
 using namespace crossareagame;
 
-static const int Z_label = 1;
+static const int Z_label = 4;
 static const int Z_playground = 0;
 
 Scene* GameLayer::createScene()
 {
 	auto scene = Scene::create();
 	auto layer = GameLayer::create();
-	//layer->setScript(std::make_shared<OneSideFastScript>(layer));
-	//layer->PushScript(std::make_shared<EasyScript>(layer));
 	scene->addChild(layer);
 	return scene;
 }
@@ -30,14 +28,11 @@ bool GameLayer::init()
 
 	Size playgroundSize = visibleSize;
 
-	startPromtVisible = true;
-	auto labelPromt = Label::createWithTTF("tap a circle that does not let it cross the screen\n(tap to continue)", "fonts/Marker Felt.ttf", 40, Size(visibleSize.width * 0.5f, 0.0f), TextHAlignment::CENTER);
-	labelPromt->setColor(Color3B::BLACK);
-	labelPromt->setPosition(origin + visibleSize * 0.5f);
-	addChild(labelPromt, Z_label, 99);
-	setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
-	setTouchEnabled(true);
-	
+	promtLabel = Label::createWithTTF("", "fonts/Marker Felt.ttf", 40, Size(visibleSize.width * 0.5f, 0.0f), TextHAlignment::CENTER);
+	promtLabel->setColor(Color3B::BLACK);
+	promtLabel->setPosition(origin + visibleSize * 0.5f);
+	promtLabel->setVisible(false);
+	addChild(promtLabel, Z_label);
 
 	playgroundLayer = PlaygroundLayer::create(playgroundSize);
 	playgroundLayer->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
@@ -70,27 +65,18 @@ bool GameLayer::init()
 	_eventDispatcher->addEventListenerWithSceneGraphPriority(keyListener, this);
 
 	commonScript = std::make_shared<EasyScript>(this);
-	//secondScript = std::make_shared<EverySideScript>(this);
+	currentScript = commonScript;
+	secondScriptMode = 0;
+
+	showCentralLabel("tap a circle that does not let it cross the screen\n(tap to continue)", true);
 
 	return true;
 }
 
 void GameLayer::update(float dt)
 {
-	if (startPromtVisible)
+	if (promtLabel->isVisible())
 		return;
-	if (!scriptsStack.empty())
-	{
-		scriptsStack.top()->update(dt);
-		if (scriptsStack.top()->isFinalized())
-			scriptsStack.pop();
-	}
-	/*if (scriptsStack.top()->isScriptDead())
-	{
-		scriptsStack.pop();
-	}
-	if (!scriptsStack.empty())
-		scriptsStack.top()->update(dt);*/
 
 	if (!commonScript->isFinalized())
 		commonScript->update(dt);
@@ -98,23 +84,37 @@ void GameLayer::update(float dt)
 	{
 		if (secondScript == nullptr)
 		{
-			if (RandomHelper::random_int<int>(1, 100) % 2 == 0)
+			int scriptMode = secondScriptMode % 3;
+			switch (scriptMode)
+			{
+			case 0:
 				secondScript = std::make_shared<OneSideFastScript>(this);
-			else
+				break;
+			case 1:
 				secondScript = std::make_shared<EverySideScript>(this);
+				break;
+			case 2:
+				secondScript = std::make_shared<OnlyBoardColor>(this, secondScriptMode == 2);
+				break;
+			default:
+				break;
+			}
 			secondScript->refresh();
+			secondScriptMode++;
+			currentScript = secondScript;
 		}
 
 		if (!secondScript->isFinalized())
 			secondScript->update(dt);
 		else
 		{
-			secondScript.reset();
 			commonScript->refresh();
+			secondScript.reset();
+
+			currentScript = commonScript;
 		}
 			
 	}
-		
 
 	if (gameInformation->isScoreChanged())
 		scoreLabel->setString("score: " + getStringFromInt(gameInformation->getScore()));
@@ -124,28 +124,21 @@ void GameLayer::update(float dt)
 
 	if (gameInformation->isGameOver())
 	{
-		auto visibleSize = Director::getInstance()->getVisibleSize();
-		Vec2 origin = Director::getInstance()->getVisibleOrigin();
-		auto labelGameOver = Label::createWithTTF("GAME OVER", "fonts/Marker Felt.ttf", 40, Size(visibleSize.width * 0.5f, 0.0f), TextHAlignment::CENTER);
-		labelGameOver->setColor(Color3B::BLACK);
-		labelGameOver->setPosition(origin + visibleSize * 0.5f);
-		this->addChild(labelGameOver, 4, Z_label);
+		showCentralLabel("GAME OVER", false);
 
 		playgroundLayer->stopLayer();
-		unscheduleUpdate();
 	}
 		//Director::getInstance()->end();
 }
 
 bool GameLayer::onTouchBegan(Touch * touch, Event * event)
 {
-	removeChildByTag(99);
-	startPromtVisible = false;
+	promtLabel->setVisible(false);
 	setTouchEnabled(false);
 	playgroundLayer->setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
 	playgroundLayer->setTouchEnabled(true);
 	scheduleUpdate();
-	commonScript->refresh();
+	currentScript->refresh();
 	return true;
 }
 
@@ -154,6 +147,22 @@ void GameLayer::setScript(const std::shared_ptr<Script> & script)
 	//this->script = script;
 }
 
+//CENTRAL LABEL INTERFACE
+
+void GameLayer::showCentralLabel(const std::string & text, bool touchControl)
+{
+	if (touchControl)
+	{
+		playgroundLayer->setTouchEnabled(false);
+		setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
+		setTouchEnabled(true);
+	}
+	
+	promtLabel->setString(text);
+	promtLabel->setVisible(true);
+
+	unscheduleUpdate();
+}
 
 //SERVICES MEMBERS
 
@@ -163,16 +172,4 @@ std::string GameLayer::getStringFromInt(int valueToString)
 	toStringConverter.clear();
 	toStringConverter << valueToString;
 	return toStringConverter.str();
-}
-
-//STACK OF SCRIPTS INTERFACE
-
-void GameLayer::PushScript(const std::shared_ptr<Script> & script)
-{
-	scriptsStack.push(script);
-}
-
-void GameLayer::PopScript()
-{
-	scriptsStack.pop();
 }

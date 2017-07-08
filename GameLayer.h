@@ -20,11 +20,6 @@ namespace crossareagame
 		CREATE_FUNC(GameLayer);
 		bool onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event) override;
 
-	public: //stack of scripts interface
-		void PushScript(const std::shared_ptr<Script> & script);
-		void PopScript();
-		std::shared_ptr<Script> TopScript() { return scriptsStack.top(); }
-
 	public: //get-set interface
 		PlaygroundLayer * getPlaygroundLayer() { return playgroundLayer; }
 		std::shared_ptr<GameInformation> getGameInformation() { return gameInformation; }
@@ -36,8 +31,11 @@ namespace crossareagame
 		cocos2d::Label * getScoreLabel() { return scoreLabel; }
 		cocos2d::Label * getLivesLabel() { return livesLabel; }
 
+	public:  //central Promt label interface
+		void showCentralLabel(const std::string & text, bool touchControl);
+
 	private:
-		bool startPromtVisible;
+		cocos2d::Label * promtLabel;
 
 	private:
 		PlaygroundLayer * playgroundLayer;
@@ -46,12 +44,11 @@ namespace crossareagame
 
 		std::shared_ptr<Script> commonScript;
 		std::shared_ptr<Script> secondScript;
-		bool switchScript;
+		std::shared_ptr<Script> currentScript;
+		int secondScriptMode; // =0 if OneSideFastScript, =1 if EverySidesScript
 
 		cocos2d::Label * scoreLabel;
 		cocos2d::Label * livesLabel;
-
-		std::stack<std::shared_ptr<Script>> scriptsStack;
 
 	private: //services members
 		std::ostringstream toStringConverter;

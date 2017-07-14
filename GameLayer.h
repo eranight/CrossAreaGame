@@ -26,7 +26,6 @@ namespace crossareagame
 		std::shared_ptr<CircleGenerator> getCircleGenerator() { return circleGenerator; }
 
 		std::shared_ptr<Script> getScript() { return commonScript; }
-		void setScript(const std::shared_ptr<Script> & script);
 
 		cocos2d::Label * getScoreLabel() { return scoreLabel; }
 		cocos2d::Label * getLivesLabel() { return livesLabel; }

@@ -142,11 +142,6 @@ bool GameLayer::onTouchBegan(Touch * touch, Event * event)
 	return true;
 }
 
-void GameLayer::setScript(const std::shared_ptr<Script> & script)
-{
-	//this->script = script;
-}
-
 //CENTRAL LABEL INTERFACE
 
 void GameLayer::showCentralLabel(const std::string & text, bool touchControl)

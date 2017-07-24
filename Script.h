@@ -112,7 +112,7 @@ namespace crossareagame
 	class OnlyBoardColor : public Script
 	{
 	public:
-		OnlyBoardColor(GameLayer * gameLayer, bool showAttempt);
+		OnlyBoardColor(GameLayer * gameLayer, bool showPrompt);
 		~OnlyBoardColor();
 
 	public:
@@ -121,7 +121,7 @@ namespace crossareagame
 		//void runFinalizeProcess() override;
 
 	private:
-		bool showAttempt;
+		bool showPrompt;
 
 		crossareagame::TimesCounter<float> generationTime;
 		crossareagame::TimesCounter<int>   cicleCounter;

@@ -347,8 +347,8 @@ void EverySideScript::runFinalizeProcess()
 ///////                      OnlyBoardColor                       ///////
 /////////////////////////////////////////////////////////////////////////
 
-OnlyBoardColor::OnlyBoardColor(GameLayer * gameLayer, bool showAttempt) :
-Script(gameLayer), showAttempt(showAttempt)
+OnlyBoardColor::OnlyBoardColor(GameLayer * gameLayer, bool showPrompt) :
+Script(gameLayer), showPrompt(showPrompt)
 {
 	
 	auto visibleSize = Director::getInstance()->getVisibleSize();
@@ -370,15 +370,13 @@ Script(gameLayer), showAttempt(showAttempt)
 	frame->drawPolygon(points, 5, Color4F(0, 0, 0, 0), wdht, choosingColor);
 	gameLayer->addChild(frame, 2, 99);
 
-	if (showAttempt)
-	{
+	if (showPrompt)
 		gameLayer->showCentralLabel("tap a circle wich has color like the frame\n(tap to continue)", true);
-	}
 }
 
 OnlyBoardColor::~OnlyBoardColor()
 {
-	gameLayer->removeChildByTag(99);
+	//gameLayer->removeChildByTag(99);
 }
 
 void OnlyBoardColor::refresh()
@@ -446,6 +444,10 @@ void OnlyBoardColor::update(float dt)
 		{
 			finalizeProcessing = false;
 			finalized = true;
+
+			gameLayer->removeChildByTag(99);
+			if (showPrompt)
+				gameLayer->showCentralLabel("tap any circles now\n(tap to continue)", true);
 		}
 	}
 }

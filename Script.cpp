@@ -376,7 +376,7 @@ Script(gameLayer), showPrompt(showPrompt)
 
 OnlyBoardColor::~OnlyBoardColor()
 {
-	//gameLayer->removeChildByTag(99);
+	gameLayer->removeChildByTag(99);
 }
 
 void OnlyBoardColor::refresh()
@@ -444,11 +444,6 @@ void OnlyBoardColor::update(float dt)
 		{
 			finalizeProcessing = false;
 			finalized = true;
-
-			gameLayer->removeChildByTag(99);
-			if (showPrompt)
-				gameLayer->showCentralLabel("tap any circles now\n(tap to continue)", true);
-		}
 	}
 }
 

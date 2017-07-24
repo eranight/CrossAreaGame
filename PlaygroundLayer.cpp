@@ -23,8 +23,6 @@ bool PlaygroundLayer::init(const Size & playgroundSize)
 
 	auto playground = DrawNode::create();
 	playground->setName("playground");
-	/*playground->drawRect(this->convertToNodeSpace(this->getPosition() - playgroundSize * 0.5f), this->convertToNodeSpace(this->getPosition() + playgroundSize * 0.5f), Color4F::BLUE);
-	this->addChild(playground);*/
 	playground->drawSolidRect(this->convertToNodeSpace(this->getPosition() - playgroundSize * 0.5f), this->convertToNodeSpace(this->getPosition() + playgroundSize * 0.5f), Color4F(Color3B(244, 255, 249)));
 	this->addChild(playground);
 
@@ -79,18 +77,6 @@ Rect PlaygroundLayer::getBoundingBox() const
 bool PlaygroundLayer::onTouchBegan(Touch * touch, Event * event)
 {
 	bool circleHit = false;
-	/*for (auto & child : getChildren())
-	{
-		if (child->getName() != "playground" && child->getBoundingBox().containsPoint(this->convertTouchToNodeSpace(touch)))
-		{
-			child->stopAllActions();
-			if (gameplay != nullptr)
-				gameplay->circleTouched(dynamic_cast<CircleStruct *>(child->getUserObject()));
-			circleHit = true;
-			child->runAction(RemoveSelf::create());
-			break;
-		}
-	}*/
 	if (tapCircle != nullptr)
 		for (int index = circles.size() - 1; index >= 0; --index)
 		{

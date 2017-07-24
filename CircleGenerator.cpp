@@ -41,7 +41,6 @@ CircleStruct * CircleGenerator::getCircleStruct(float minScale, float maxScale, 
 	auto circleStruct = new (std::nothrow) CircleStruct();
 	if (circleStruct != nullptr)
 	{
-		//putColor(circleStruct, getRandomColorFromDeque());
 		putColor(circleStruct, colorsRandomize.getRandomValue());
 		putScale(circleStruct, minScale, maxScale);
 		putStartFinishPos(circleStruct, side);
@@ -128,7 +127,6 @@ void CircleGenerator::putCrossTime(CircleStruct * circleStruct, float minCrossTi
 
 void CircleGenerator::putStartFinishPos(CircleStruct * circleStruct, const PlaygroundSide & side)
 {
-	//int startSideAsInt = side == PlaygroundSide::NONE ? static_cast<int>(getRandomSideFromDeque()) : static_cast<int>(side);
 	int startSideAsInt = side == PlaygroundSide::NONE ? static_cast<int>(sidesRandomize.getRandomValue()) : static_cast<int>(side);
 
 	circleStruct->startSide = static_cast<PlaygroundSide>(startSideAsInt);

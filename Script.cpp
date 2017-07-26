@@ -371,12 +371,13 @@ Script(gameLayer), showPrompt(showPrompt)
 	gameLayer->addChild(frame, 2, 99);
 
 	if (showPrompt)
-		gameLayer->showCentralLabel("tap a circle wich has color like the frame\n(tap to continue)", true);
+		gameLayer->showCentralLabel("tap a circle wich has color like the frame\n(tap to continue)", true, ScriptEvent::PREV_START);
+		
 }
 
 OnlyBoardColor::~OnlyBoardColor()
 {
-	gameLayer->removeChildByTag(99);
+	
 }
 
 void OnlyBoardColor::refresh()
@@ -444,6 +445,13 @@ void OnlyBoardColor::update(float dt)
 		{
 			finalizeProcessing = false;
 			finalized = true;
+
+			if (showPrompt)
+			{
+				gameLayer->removeChildByTag(99);
+				gameLayer->showCentralLabel("tap any circles now\n(tap to continue)", true, ScriptEvent::POST_FINISH);
+			}
+		}
 	}
 }
 

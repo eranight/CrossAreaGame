@@ -2,6 +2,7 @@
 #define __GAMELAYER_H__
 
 #include "cocos2d.h"
+#include "Utils.h"
 
 namespace crossareagame
 {
@@ -31,10 +32,11 @@ namespace crossareagame
 		cocos2d::Label * getLivesLabel() { return livesLabel; }
 
 	public:  //central Promt label interface
-		void showCentralLabel(const std::string & text, bool touchControl);
+		void showCentralLabel(const std::string & text, bool touchControl, const crossareagame::ScriptEvent & scriptEvent);
 
 	private:
 		cocos2d::Label * promtLabel;
+		bool refreshCurrentScript;
 
 	private:
 		PlaygroundLayer * playgroundLayer;

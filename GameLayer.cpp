@@ -68,7 +68,7 @@ bool GameLayer::init()
 	currentScript = commonScript;
 	secondScriptMode = 0;
 
-	showCentralLabel("tap a circle that does not let it cross the screen\n(tap to continue)", true);
+	showCentralLabel("tap a circle that does not let it cross the screen\n(tap to continue)", true, ScriptEvent::PREV_START);
 
 	return true;
 }
@@ -124,7 +124,7 @@ void GameLayer::update(float dt)
 
 	if (gameInformation->isGameOver())
 	{
-		showCentralLabel("GAME OVER", false);
+		showCentralLabel("GAME OVER", false, ScriptEvent::POST_FINISH);
 
 		playgroundLayer->stopLayer();
 	}
@@ -138,13 +138,14 @@ bool GameLayer::onTouchBegan(Touch * touch, Event * event)
 	playgroundLayer->setTouchMode(Touch::DispatchMode::ONE_BY_ONE);
 	playgroundLayer->setTouchEnabled(true);
 	scheduleUpdate();
-	currentScript->refresh();
+	if (refreshCurrentScript)
+		currentScript->refresh();
 	return true;
 }
 
 //CENTRAL LABEL INTERFACE
 
-void GameLayer::showCentralLabel(const std::string & text, bool touchControl)
+void GameLayer::showCentralLabel(const std::string & text, bool touchControl, const crossareagame::ScriptEvent & scriptEvent)
 {
 	if (touchControl)
 	{
@@ -153,6 +154,11 @@ void GameLayer::showCentralLabel(const std::string & text, bool touchControl)
 		setTouchEnabled(true);
 	}
 	
+	if (scriptEvent == ScriptEvent::PREV_START)
+		refreshCurrentScript = true;
+	else if (scriptEvent == ScriptEvent::POST_FINISH)
+		refreshCurrentScript = false;
+
 	promtLabel->setString(text);
 	promtLabel->setVisible(true);
 

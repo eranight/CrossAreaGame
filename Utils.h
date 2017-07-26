@@ -15,9 +15,14 @@ namespace crossareagame
 		NONE    //use it to show playgroundSide is not defined
 	};
 
-	class CircleStruct : public cocos2d::Ref
+	enum class ScriptEvent
 	{
-	public:
+		PREV_START = 0,
+		POST_FINISH
+	};
+
+	struct CircleStruct : public cocos2d::Ref
+	{
 		PlaygroundSide startSide, finishSide;
 		cocos2d::Vec2 startPos, finishPos;
 		cocos2d::Color4B color;

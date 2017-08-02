@@ -3,6 +3,8 @@
 
 #include "cocos2d.h"
 
+//git test
+
 namespace crossareagame
 {
 	enum class PlaygroundSide
